@@ -50,30 +50,38 @@ kbd{background:#fff;color:#0b2e1f;border-radius:6px;padding:1px 8px;font-family:
 .vol button:focus-visible,.vol input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .vol input{width:110px;accent-color:#f0a81c;cursor:pointer}
 @media (max-width:480px){.vol input{width:84px}}
+.pill.warn{background:rgba(194,65,45,.95);animation:tb 1s ease-in-out infinite}
+@keyframes tb{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.pill.warn{animation:none}}
+#over{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;color:#fff;background:radial-gradient(ellipse at center,rgba(60,10,8,.55),rgba(40,6,5,.92))}
+#over h2{font-size:clamp(2.2rem,8vw,4rem);margin:0 0 8px;text-shadow:0 3px 0 rgba(0,0,0,.5)}
+#over p{max-width:30em;margin:0 0 10px;font-size:1.1rem;line-height:1.5}
+@media (min-width:700px){.opts .opt:last-child:nth-child(odd){grid-column:1/-1}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="hud"><div class="row"><div class="pill" id="badge">Misi 1 / 10</div><div class="pill hide" id="hint"></div></div><div class="chips" id="chips"></div></div>
+<div class="hud"><div class="row"><div class="pill" id="badge">Misi 1 / 10</div><div class="pill" id="timer" role="timer" aria-label="Sisa waktu">⏱ 03:00</div><div class="pill hide" id="hint"></div></div><div class="chips" id="chips"></div></div>
 <div id="flash"></div>
 <section id="card" class="hide"></section>
 <div class="pad" id="pad"><button data-k="F" aria-label="Maju">▲</button><button data-k="L" aria-label="Kiri">◀</button><button data-k="R" aria-label="Kanan">▶</button><button data-k="B" aria-label="Mundur">▼</button></div>
-<div id="title"><h1>Petualangan Berpikir Komputasional XI</h1><p>Murid PakNam menjelajahi hutan rimba untuk menemukan buku masa depan, Informatika XI.</p><p id="tmsg">Berjalanlah dengan <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau tombol panah. Temui cincin emas di setiap misi dan jawab pertanyaannya. Jawaban benar memberi kode misi dan membuka misi berikutnya, jawaban salah membuatmu harus kembali ke misi sebelumnya.</p><button class="go" id="tbtn">Mulai petualangan</button></div>
+<div id="title"><h1>Petualangan Berpikir Komputasional XI</h1><p>Murid PakNam menjelajahi hutan rimba untuk menemukan buku masa depan, Informatika XI.</p><p id="tmsg">Berjalanlah dengan <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> atau tombol panah. Temui cincin emas di setiap misi dan jawab pertanyaannya. Jawaban benar memberi kode misi dan membuka misi berikutnya, jawaban salah membuatmu harus kembali ke misi sebelumnya. Selesaikan semua misi sebelum waktu 3 menit habis, atau permainan berakhir.</p><button class="go" id="tbtn">Mulai petualangan</button></div>
 <div class="vol" id="vol"><button id="vbtn" type="button" aria-label="Bisukan musik" title="Bisukan / aktifkan musik">🔊</button><input id="vrng" type="range" min="0" max="100" step="1" value="60" aria-label="Volume musik" title="Volume musik"></div>
+<div id="over" class="hide" role="alertdialog" aria-live="assertive"><h2>Game Over</h2><p>Waktu 3 menit sudah habis. Raka belum berhasil membawa pulang buku Informatika XI.</p><p id="oinfo"></p><button class="go" id="retry" type="button">Coba lagi</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 var CODE=["A","S","N","A","M","4","6","0","0","1"];
 var Q=[
-{q:"Berapa langkah yang dilakukan dalam pemrograman, dan bagaimana urutannya?",o:["Menganalisis permasalahan, mendesain solusi, mengimplementasikan solusi (coding), menguji program","Coding, menganalisis, menguji, mendesain solusi","Mendesain solusi, menguji, coding, menganalisis","Menguji, coding, mendesain solusi, menganalisis"],a:0,e:"Empat langkah pemrograman: Analyzing, Problem Solving, Coding, lalu Testing. Keempatnya membentuk siklus yang diulang."},
-{q:"Tahap menganalisis permasalahan menghasilkan pernyataan masalah (problem statement). Apa isinya?",o:["Masukan (input), keluaran (output), dan batasan (constraint)","Warna, ukuran huruf, dan tata letak","Nama bahasa pemrograman dan kompilator","Jumlah baris kode dan komentar"],a:0,e:"Pernyataan masalah menjelaskan input, output, serta batasan dari program yang akan dibuat."},
-{q:"Program jenis segitiga diuji dengan masukan sisi 100, 200, dan 500. Apa keluaran yang seharusnya?",o:["Segitiga Sama Sisi","Segitiga Sama Kaki","Segitiga Sembarang","Bukan Segitiga"],a:3,e:"Teorema pertidaksamaan segitiga mensyaratkan a+b>c. Di sini 100+200 tidak lebih dari 500, jadi bukan segitiga."},
-{q:"Pada definisi barisan atau fungsi rekursif, minimal dua hal apa yang harus ditentukan?",o:["Indeks dan larik","Basis dan rekursi","Input dan output","Variabel dan konstanta"],a:1,e:"Basis adalah nilai awal, sedangkan rekursi adalah hubungan antara nilai sekarang dengan nilai-nilai sebelumnya."},
-{q:"Barisan Fibonacci: 1, 1, 2, 3, 5, 8, 13, 21, ... Berapakah suku ke-9?",o:["29","32","34","55"],a:2,e:"Setiap suku adalah jumlah dua suku sebelumnya, jadi 13 + 21 = 34."},
-{q:"Budi punya 8 kantong ikan berisi 3, 5, 2, 8, 4, 6, 6, 3 ekor, dan mobilnya hanya muat 4 kantong. Dengan algoritma greedy, berapa ekor ikan terbanyak yang bisa dibawa?",o:["22 ekor","23 ekor","25 ekor","27 ekor"],a:2,e:"Greedy mengurutkan data lalu mengambil yang terbaik di setiap langkah: 8 + 6 + 6 + 5 = 25 ekor."},
-{q:"Uang 38 ribu rupiah dibuat dari pecahan seribuan, dua ribuan, lima ribuan, sepuluh ribuan, dan dua puluh ribuan. Berapa lembar paling sedikit?",o:["4 lembar","5 lembar","6 lembar","8 lembar"],a:1,e:"20 + 10 + 5 + 2 + 1 = 38 ribu, yaitu 5 lembar."},
-{q:"Dalam pemrograman dinamis, apa yang dimaksud dengan memoisasi?",o:["Menghafal materi pelajaran sebelum ujian","Menyimpan hasil perhitungan sebelumnya agar tidak mengulang perhitungan yang sama","Mengurutkan data dari terkecil","Menghapus variabel yang tidak dipakai"],a:1,e:"Memoisasi memakai tabel untuk menyimpan solusi subproblem, sehingga perhitungan yang tumpang tindih tidak diulang."},
-{q:"Pada bahasa C, string diimplementasikan sebagai apa?",o:["Bilangan bulat tunggal","Larik karakter yang diakhiri karakter “\\0”","Matriks dua dimensi bilangan","Fungsi rekursif"],a:1,e:"String di C adalah larik karakter yang ditutup karakter “\\0”, sehingga bisa diproses seperti larik."},
-{q:"Misi terakhir! Budi memindahkan panekuk dari piring A ke C, dengan piring B sebagai bantuan. Untuk 2 panekuk perlu 3 langkah. Berapa langkah minimal untuk 6 panekuk?",o:["12 langkah","36 langkah","63 langkah","64 langkah"],a:2,e:"Rekurensinya T(n) = 2·T(n−1) + 1, sehingga urutannya 1, 3, 7, 15, 31, 63."}
+{q:"Berapa langkah yang dilakukan dalam pemrograman, dan bagaimana urutannya?",o:["Menganalisis permasalahan, mendesain solusi, mengimplementasikan solusi (coding), menguji program","Coding, menganalisis, menguji, mendesain solusi","Mendesain solusi, menguji, coding, menganalisis","Menguji, coding, mendesain solusi, menganalisis","Mendesain solusi, menganalisis, coding, menguji program"],a:0,e:"Empat langkah pemrograman: Analyzing, Problem Solving, Coding, lalu Testing. Keempatnya membentuk siklus yang diulang."},
+{q:"Tahap menganalisis permasalahan menghasilkan pernyataan masalah (problem statement). Apa isinya?",o:["Masukan (input), keluaran (output), dan batasan (constraint)","Warna, ukuran huruf, dan tata letak","Nama bahasa pemrograman dan kompilator","Jumlah baris kode dan komentar","Kode sumber dan hasil pengujian program"],a:0,e:"Pernyataan masalah menjelaskan input, output, serta batasan dari program yang akan dibuat."},
+{q:"Program jenis segitiga diuji dengan masukan sisi 100, 200, dan 500. Apa keluaran yang seharusnya?",o:["Segitiga Sama Sisi","Segitiga Sama Kaki","Segitiga Sembarang","Bukan Segitiga","Segitiga Siku-siku"],a:3,e:"Teorema pertidaksamaan segitiga mensyaratkan a+b>c. Di sini 100+200 tidak lebih dari 500, jadi bukan segitiga."},
+{q:"Pada definisi barisan atau fungsi rekursif, minimal dua hal apa yang harus ditentukan?",o:["Indeks dan larik","Basis dan rekursi","Input dan output","Variabel dan konstanta","Pengurutan dan pencarian"],a:1,e:"Basis adalah nilai awal, sedangkan rekursi adalah hubungan antara nilai sekarang dengan nilai-nilai sebelumnya."},
+{q:"Barisan Fibonacci: 1, 1, 2, 3, 5, 8, 13, 21, ... Berapakah suku ke-9?",o:["29","32","34","55","21"],a:2,e:"Setiap suku adalah jumlah dua suku sebelumnya, jadi 13 + 21 = 34."},
+{q:"Budi punya 8 kantong ikan berisi 3, 5, 2, 8, 4, 6, 6, 3 ekor, dan mobilnya hanya muat 4 kantong. Dengan algoritma greedy, berapa ekor ikan terbanyak yang bisa dibawa?",o:["22 ekor","23 ekor","25 ekor","27 ekor","24 ekor"],a:2,e:"Greedy mengurutkan data lalu mengambil yang terbaik di setiap langkah: 8 + 6 + 6 + 5 = 25 ekor."},
+{q:"Uang 38 ribu rupiah dibuat dari pecahan seribuan, dua ribuan, lima ribuan, sepuluh ribuan, dan dua puluh ribuan. Berapa lembar paling sedikit?",o:["4 lembar","5 lembar","6 lembar","8 lembar","7 lembar"],a:1,e:"20 + 10 + 5 + 2 + 1 = 38 ribu, yaitu 5 lembar."},
+{q:"Dalam pemrograman dinamis, apa yang dimaksud dengan memoisasi?",o:["Menghafal materi pelajaran sebelum ujian","Menyimpan hasil perhitungan sebelumnya agar tidak mengulang perhitungan yang sama","Mengurutkan data dari terkecil","Menghapus variabel yang tidak dipakai","Mengulang perhitungan yang sama berkali-kali"],a:1,e:"Memoisasi memakai tabel untuk menyimpan solusi subproblem, sehingga perhitungan yang tumpang tindih tidak diulang."},
+{q:"Pada bahasa C, string diimplementasikan sebagai apa?",o:["Bilangan bulat tunggal","Larik karakter yang diakhiri karakter “\\0”","Matriks dua dimensi bilangan","Fungsi rekursif","Tipe data string bawaan seperti pada C++ atau Java"],a:1,e:"String di C adalah larik karakter yang ditutup karakter “\\0”, sehingga bisa diproses seperti larik."},
+{q:"Misi terakhir! Budi memindahkan panekuk dari piring A ke C, dengan piring B sebagai bantuan. Untuk 2 panekuk perlu 3 langkah. Berapa langkah minimal untuk 6 panekuk?",o:["12 langkah","36 langkah","63 langkah","64 langkah","31 langkah"],a:2,e:"Rekurensinya T(n) = 2·T(n−1) + 1, sehingga urutannya 1, 3, 7, 15, 31, 63."}
 ];
 function $(i){return document.getElementById(i)}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
@@ -145,7 +153,7 @@ tg.add(pl,pe,book,beam,tl,spk);
 var FF=new Float32Array(450),fb=[];for(i=0;i<150;i++){q=PAT(Math.random()*11);fb.push([q.x+(Math.random()-.5)*26,.6+Math.random()*3.5,q.z+(Math.random()-.5)*10,Math.random()*6])}
 var ffp=new T.Points(new T.BufferGeometry(),new T.PointsMaterial({color:0xf4ff7a,size:.4,transparent:true,blending:T.AdditiveBlending,depthWrite:false}));
 ffp.geometry.setAttribute("position",new T.BufferAttribute(FF,3));ffp.frustumCulled=false;S.add(ffp);
-var tkn=0,takeT=0,takeP=0,sx=0,sz=0,pos=0,tt=0,sh=0,snap=true,state="title",armed=true,hintTxt="",lk=new T.Vector3(),card=$("card"),keys={F:0,B:0,L:0,R:0};
+var tleft=180,tOn=0,lastT=-1,lastN=performance.now(),tkn=0,takeT=0,takeP=0,sx=0,sz=0,pos=0,tt=0,sh=0,snap=true,state="title",armed=true,hintTxt="",lk=new T.Vector3(),card=$("card"),keys={F:0,B:0,L:0,R:0};
 function col(o){TP.forEach(function(t){var dx=o.x-t[0],dz=o.z-t[1],dd=dx*dx+dz*dz;if(dd<2.25&&dd>1e-4){var l=Math.sqrt(dd);o.x=t[0]+dx/l*1.5;o.z=t[1]+dz/l*1.5}})}
 function start(){var a=PAT(-.5);K[0].x=a.x;K[0].z=a.z;K[0].yaw=Math.PI;K[0].hold=0;tkn=0;takeP=0;book.scale.setScalar(1);book.position.set(0,3.2,0);beam.visible=true;snap=true}
 start();
@@ -178,16 +186,19 @@ var go=$("go");go.focus();card.scrollTop=card.scrollHeight;
 go.onclick=function(){pos=nx;armed=false;hud();card.classList.add("hide");state="walk"}}
 function win(){
 state="win";keys.F=keys.B=keys.L=keys.R=0;hud();
-card.innerHTML='<div class="win"><h2>Harta karun ditemukan!</h2><p>Murid PakNam mengambil buku masa depan <strong>Informatika XI</strong>. Selamat, kamu berhasil menyelesaikan 10 misi!</p><div class="code">Kode rahasia: <b>'+CODE.join(" ")+'</b></div><button class="go" id="again">Main lagi</button></div>';
-card.classList.remove("hide");beep(true);$("again").onclick=function(){pos=0;armed=true;start();hud();card.classList.add("hide");state="walk"}}
-$("tbtn").onclick=function(){$("title").classList.add("hide");beep(true);state="walk"};
+card.innerHTML='<div class="win"><h2>Harta karun ditemukan!</h2><p>Murid PakNam mengambil buku masa depan <strong>Informatika XI</strong>. Selamat, kamu berhasil menyelesaikan 10 misi!</p><p>Sisa waktu: <strong>'+fmt(tleft)+'</strong></p><div class="code">Kode rahasia: <b>'+CODE.join(" ")+'</b></div><button class="go" id="again">Main lagi</button></div>';
+card.classList.remove("hide");beep(true);$("again").onclick=function(){pos=0;armed=true;start();hud();card.classList.add("hide");tleft=180;tOn=1;lastN=performance.now();state="walk"}}
+$("tbtn").onclick=function(){$("title").classList.add("hide");beep(true);tleft=180;tOn=1;lastN=performance.now();state="walk"};
+function fmt(s){s=Math.ceil(s);return("0"+Math.floor(s/60)).slice(-2)+":"+("0"+s%60).slice(-2)}
+function over(){state="over";tOn=0;keys.F=keys.B=keys.L=keys.R=0;card.classList.add("hide");$("oinfo").textContent="Kamu sampai di Misi "+Math.min(pos+1,10)+" dari 10.";$("over").classList.remove("hide");beep(false)}
+$("retry").onclick=function(){$("over").classList.add("hide");pos=0;armed=true;start();hud();tleft=180;tOn=1;lastN=performance.now();state="walk"};
 function chestPos(e){var L=K[0],f=Math.sin(L.yaw),h=Math.cos(L.yaw),da=Math.atan2(Math.sin(L.yaw-book.rotation.y),Math.cos(L.yaw-book.rotation.y));book.position.set((L.x+f*.34-tg.position.x)*e,3.2+(1.55-3.2)*e,(L.z+h*.34-tg.position.z)*e);book.scale.setScalar(1-.64*e);book.rotation.y+=da*.25}
-function take(){state="take";keys.F=keys.B=keys.L=keys.R=0;takeP=0;takeT=0;var L=K[0],dx=L.x-tgp.x,dz=L.z-tgp.z,l=Math.hypot(dx,dz)||1;sx=tgp.x+dx/l*2.2;sz=tgp.z+dz/l*2.2}
+function take(){state="take";tOn=0;keys.F=keys.B=keys.L=keys.R=0;takeP=0;takeT=0;var L=K[0],dx=L.x-tgp.x,dz=L.z-tgp.z,l=Math.hypot(dx,dz)||1;sx=tgp.x+dx/l*2.2;sz=tgp.z+dz/l*2.2}
 hud();
 function anim(k,mvf,want,dt){var dy=want-k.yaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));k.yaw+=dy*Math.min(1,dt*9);k.amp+=((mvf?1:0)-k.amp)*Math.min(1,dt*8);if(mvf)k.ph+=dt*10;
 var a=Math.sin(k.ph)*.7*k.amp;k.g.position.set(k.x,Math.abs(a)*.12,k.z);k.g.rotation.y=k.yaw;k.lL.rotation.x=a;k.lR.rotation.x=-a;k.aL.rotation.x=-a*(1-k.hold)-.6*k.hold;k.aR.rotation.x=a*(1-k.hold)-.6*k.hold}
 function update(dt){
-tt+=dt;var L=K[0],F=K[1],mx=0,mz=0,SPD=6.5;
+tt+=dt;var nowT=performance.now(),rd=(nowT-lastN)/1000;lastN=nowT;if(tOn&&(state==="walk"||state==="ask"||state==="fb")){tleft-=rd;if(tleft<=0){tleft=0;over()}}var tsec=Math.ceil(tleft);if(tsec!==lastT){lastT=tsec;var te=$("timer");te.textContent="⏱ "+fmt(tsec);te.classList.toggle("warn",tsec<=30&&tOn===1)}var L=K[0],F=K[1],mx=0,mz=0,SPD=6.5;
 if(state==="walk"){mx=keys.R-keys.L;mz=keys.B-keys.F}
 var mv=mx||mz,w0=L.yaw;
 if(mv){var l=Math.hypot(mx,mz);mx/=l;mz/=l;L.x=Math.max(-45,Math.min(45,L.x+mx*SPD*dt));L.z=Math.max(-178,Math.min(14,L.z+mz*SPD*dt));col(L);w0=Math.atan2(mx,mz)}
